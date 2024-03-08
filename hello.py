@@ -9,6 +9,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail, Message
 from datetime import datetime
+import smtplib
+from dotenv import load_dotenv
+load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,8 +23,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
 app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <waldmanngeri@gmail.com>'
 app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
@@ -53,12 +54,9 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 
-def send_email(to, subject, template, **kwargs):
-    msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
-                  sender=app.config['FLASKY_MAIL_SENDER'], recipients=[to])
-    msg.body = render_template(template + '.txt', **kwargs)
-    msg.html = render_template(template + '.html', **kwargs)
-    mail.send(msg)
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 
 class NameForm(FlaskForm):
@@ -83,6 +81,8 @@ def internal_server_error(e):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    user_name = os.getenv('MAIL_USERNAME')
+    pswd = os.getenv('MAIL_PASSWORD')
     form = NameForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.name.data).first()
@@ -91,9 +91,14 @@ def index():
             db.session.add(user)
             db.session.commit()
             session['known'] = False
-            if app.config['FLASKY_ADMIN']:
-                send_email(app.config['FLASKY_ADMIN'], 'New User',
-                           'mail/new_user', user=user)
+            smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
+            smtpObj.ehlo()
+            smtpObj.starttls()
+            smtpObj.login(user_name, pswd)
+            smtpObj.sendmail(user_name, user_name,
+                             'Subject:New Request.\nPlease add new user {} '.format(user))
+            {}
+            smtpObj.quit()
         else:
             session['known'] = True
         session['name'] = form.name.data
@@ -104,3 +109,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
