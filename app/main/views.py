@@ -12,6 +12,7 @@ from ..decorators import admin_required
 from datetime import datetime
 import smtplib
 
+
 @main.route('/', methods=['GET', 'POST'])
 def index():
     user_name = os.getenv('MAIL_USERNAME')
@@ -62,6 +63,7 @@ def edit_profile():
     form.location.data = current_user.location
     form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', form=form)
+
 
 @main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
 @login_required
