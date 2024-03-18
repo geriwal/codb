@@ -1,5 +1,5 @@
 import os
-from flask import render_template, session, redirect, url_for, current_app, flash
+from flask import request, render_template, session, redirect, url_for, current_app, flash
 from flask_login import login_required, current_user
 from .. import db
 from . import main
@@ -11,7 +11,7 @@ from datetime import datetime
 import smtplib
 
 @main.route('/', methods=['GET', 'POST'])
-def posts():
+def index():
     form = PostForm()
     if current_user.can(Permission.WRITE) and form.validate_on_submit():
         post = Post(body=form.body.data,
@@ -19,11 +19,16 @@ def posts():
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('.index'))
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('index.html', form=form, posts=posts)
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page=page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out=False)
+    posts = pagination.items
+    return render_template('index.html', form=form, posts=posts,
+                           pagination=pagination)
 
 @main.route('/', methods=['GET', 'POST'])
-def index():
+def mail():
     user_name = os.getenv('MAIL_USERNAME')
     pswd = os.getenv('MAIL_PASSWORD')
     form = NameForm()
