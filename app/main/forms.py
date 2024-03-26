@@ -56,3 +56,11 @@ class PostForm(FlaskForm):
 class CommentForm(FlaskForm):
     body = StringField('Enter your comment', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+class EnterCode(FlaskForm):
+    code_language = SelectField(u'Code Language',
+        choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+    code = TextAreaField('Code')
+    explanation = TextAreaField('Explanation')
+    submit = SubmitField('Submit')

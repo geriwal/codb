@@ -6,8 +6,8 @@ from .. import db
 from . import main
 from .forms import NameForm
 from ..decorators import admin_required, permission_required
-from ..models import Permission, Role, User, Post, Comment
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm
+from ..models import Permission, Role, User, Post, Comment, Code
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, EnterCode
 from datetime import datetime
 import smtplib
 
@@ -276,5 +276,20 @@ def moderate_disable(id):
     db.session.commit()
     return redirect(url_for('.moderate',
                             page=request.args.get('page', 1, type=int)))
+
+
+@main.route('/enter_code', methods=['GET', 'POST'])
+def enter_code():
+    form = EnterCode()
+    if current_user.can(Permission.WRITE) and form.validate_on_submit():
+        codes = Code(code_language=form.code_language.data,
+                    code=form.code.data,
+                    explanation=form.explanation.data,
+                    code_author=current_user._get_current_object())
+        db.session.add(codes)
+        db.session.commit()
+        flash('Your code has been stored.')
+    return render_template('enter_code.html', form=form)
+
 
 

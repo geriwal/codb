@@ -104,6 +104,7 @@ class User(UserMixin, db.Model):
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    codes = db.relationship('Code', backref='code_author', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -287,3 +288,12 @@ class Comment(db.Model):
             tags=allowed_tags, strip=True))
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
+
+class Code(db.Model):
+    __tablename__ = 'codes'
+    id = db.Column(db.Integer, primary_key=True)
+    code_language = db.Column(db.String(40))
+    code = db.Column(db.Text)
+    explanation = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    code_author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
