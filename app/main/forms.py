@@ -64,3 +64,7 @@ class EnterCode(FlaskForm):
     code = TextAreaField('Code')
     explanation = TextAreaField('Explanation')
     submit = SubmitField('Submit')
+
+class SearchCode(FlaskForm):
+    search_code = StringField('Enter code')
+    submit = SubmitField('Submit')

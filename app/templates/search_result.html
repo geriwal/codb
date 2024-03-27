@@ -1,0 +1,7 @@
+{% for result in results %}
+<tr>
+    <td>{{ result.code }}</td>
+    <td>{{ result.explanation }}</td>
+    <td><a href="{{ '/edit_id/%s'%result.id }}">{{ result.id }}</a></td>
+</tr>
+{% endfor %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Code-DB - Search code{% endblock %}
+
+{% block page_content %}
+    <head>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </head>
+    <body>
+      <div>
+          <input type="text" class="form-control" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+      </div>
+      <br />
+      <div>
+          <table class="table">
+              <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Explanation</th>
+                    <th>Id</th>
+                </tr>
+              </thead>
+              <tbody id="results">
+              </tbody>
+          </table>
+      </div>
+    </body>
+{% endblock %}

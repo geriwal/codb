@@ -7,7 +7,8 @@ from . import main
 from .forms import NameForm
 from ..decorators import admin_required, permission_required
 from ..models import Permission, Role, User, Post, Comment, Code
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, EnterCode
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm, EnterCode, \
+    SearchCode
 from datetime import datetime
 import smtplib
 
@@ -290,6 +291,27 @@ def enter_code():
         db.session.commit()
         flash('Your code has been stored.')
     return render_template('enter_code.html', form=form)
+
+
+@main.route('/search_code')
+def search_code():
+    return render_template("search_code.html", user=current_user)
+
+
+@main.route('/search', methods=['GET', 'POST'])
+def search():
+    q = request.args.get("q")
+    print(q)
+    if q:
+        results = Code.query.filter(Code.code.icontains(q) | Code.explanation.icontains(q)).limit(100).all()
+    else:
+        results = []
+    return render_template("search_result.html", results=results, user=current_user)
+
+
+
+
+
 
 
 
